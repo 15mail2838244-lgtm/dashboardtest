@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  p {
+    line-height: 1.75;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-blue-900 to-blue-800 text-white font-semibold rounded-lg
+           transition-all duration-300 shadow-lg
+           hover:from-blue-800 hover:to-blue-700 hover:shadow-xl hover:scale-105
+           active:scale-100 active:shadow-md
+           focus:outline-none focus:ring-2 focus:ring-blue-900 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-lg
+           border-2 border-white/30 transition-all duration-300 shadow-lg
+           hover:bg-white/20 hover:shadow-xl hover:scale-105
+           active:scale-100 active:shadow-md
+           focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2;
+  }
+
+  .btn-accent {
+    @apply px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-lg
+           transition-all duration-300 shadow-lg
+           hover:from-amber-600 hover:to-amber-700 hover:shadow-xl hover:scale-105
+           active:scale-100 active:shadow-md
+           focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-lg p-6 transition-all duration-300
+           hover:shadow-2xl hover:-translate-y-1;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg
+           transition-all duration-200
+           focus:ring-2 focus:ring-blue-900 focus:border-transparent
+           hover:border-gray-400;
+  }
+
+  .section-heading {
+    @apply text-4xl md:text-5xl font-bold mb-4 tracking-tight;
+  }
+
+  .section-subheading {
+    @apply text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed;
+  }
+}
