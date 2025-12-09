@@ -24,13 +24,25 @@ const tableBody = document.getElementById("submissionsBody");
 // FETCH SUBMISSIONS
 async function loadSubmissions() {
   try {
-    const res = await fetch("/.netlify/functions/get-submissions");
-    const json = await res.json();
+    const res = await fetch("/.netlify/forms/contact/submissions");
 
-    loadingState.classList.add("hidden");
+if (!res.ok) throw new Error("Failed to load submissions");
 
-    submissions = json.submissions || [];
-    filtered = [...submissions];
+loadingState.classList.add("hidden");
+
+const json = await res.json();
+
+// Convert Netlify format → your dashboard format
+submissions = json.map(item => ({
+  name: item.data.name,
+  email: item.data.email,
+  phone: item.data.phone,
+  message: item.data.message,
+  created_at: item.created_at
+}));
+
+filtered = [...submissions];
+
 
     if (filtered.length === 0) {
       emptyState.classList.remove("hidden");
