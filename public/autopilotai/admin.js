@@ -24,7 +24,7 @@ const tableBody = document.getElementById("submissionsBody");
 // FETCH SUBMISSIONS
 async function loadSubmissions() {
   try {
-    const res = await fetch("/.netlify/forms/contact/submissions");
+    const res = await fetch("/.netlify/functions/get-submissions");
 
     if (!res.ok) throw new Error("Failed to load submissions");
 
@@ -33,12 +33,12 @@ async function loadSubmissions() {
     loadingState.classList.add("hidden");
 
     // Convert Netlify format → dashboard format
-    submissions = json.map(item => ({
+    submissions = json.submissions.map(item => ({
       name: item.data.name,
       email: item.data.email,
       phone: item.data.phone,
       message: item.data.message,
-      created_at: item.created_at || new Date().toISOString()
+      created_at: item.created_at
     }));
 
     filtered = [...submissions];
