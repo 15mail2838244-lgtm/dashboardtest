@@ -24,21 +24,29 @@ const tableBody = document.getElementById("submissionsBody");
 // FETCH SUBMISSIONS
 async function loadSubmissions() {
   try {
+    // call your Netlify function (server-side)
     const res = await fetch("/.netlify/functions/get-submissions");
 
-    if (!res.ok) throw new Error("Failed to load submissions");
+    if (!res.ok) {
+      const text = await res.text().catch(() => null);
+      throw new Error(`Function returned ${res.status} ${text ? " - " + text : ""}`);
+    }
 
     const json = await res.json();
 
     loadingState.classList.add("hidden");
 
-    // Convert Netlify format → dashboard format
+    // function returns { submissions: [...] }
+    if (!json || !Array.isArray(json.submissions)) {
+      throw new Error("Invalid function response format");
+    }
+
     submissions = json.submissions.map(item => ({
-      name: item.data.name,
-      email: item.data.email,
-      phone: item.data.phone,
-      message: item.data.message,
-      created_at: item.created_at
+      name: (item.data && item.data.name) || "",
+      email: (item.data && item.data.email) || "",
+      phone: (item.data && item.data.phone) || "",
+      message: (item.data && item.data.message) || "",
+      created_at: item.created_at || new Date().toISOString()
     }));
 
     filtered = [...submissions];
@@ -53,6 +61,10 @@ async function loadSubmissions() {
     console.error("Error loading submissions:", err);
     loadingState.classList.add("hidden");
     errorState.classList.remove("hidden");
+    // show error in console and also put a descriptive message in the page for debugging
+    try {
+      document.getElementById("errorState").textContent = "Error loading submissions: " + err.message;
+    } catch(e){}
   }
 }
 
