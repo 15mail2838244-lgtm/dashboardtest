@@ -1,34 +1,45 @@
+import fetch from 'node-fetch';
+
 export async function handler() {
   try {
-    const API_TOKEN = process.env.NETLIFY_API_TOKEN;
-    const FORM_NAME = process.env.NETLIFY_FORM_NAME || "contact";
+    const apiToken = process.env.NETLIFY_API_TOKEN;
+    const formName = "contact";
 
-    const response = await fetch(
-      `https://api.netlify.com/api/v1/forms?access_token=${API_TOKEN}`
-    );
-
-    const forms = await response.json();
-    const form = forms.find((f) => f.name === FORM_NAME);
-
-    if (!form) {
+    if (!apiToken) {
       return {
-        statusCode: 404,
-        body: JSON.stringify({ error: "Form not found" }),
+        statusCode: 500,
+        body: JSON.stringify({ error: "Missing NETLIFY_API_TOKEN" })
       };
     }
 
-    const submissionsRes = await fetch(
-      `https://api.netlify.com/api/v1/forms/${form.id}/submissions?access_token=${API_TOKEN}`
-    );
+    // Get all forms on the site
+    const allForms = await fetch(`https://api.netlify.com/api/v1/forms?access_token=${apiToken}`);
+    const formsJson = await allForms.json();
 
+    const form = formsJson.find(f => f.name === formName);
+    if (!form) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: "Form 'contact' not found" })
+      };
+    }
+
+    // Fetch submissions for this form
+    const submissionsRes = await fetch(
+      `https://api.netlify.com/api/v1/forms/${form.id}/submissions?access_token=${apiToken}`
+    );
     const submissions = await submissionsRes.json();
 
     return {
       statusCode: 200,
-      body: JSON.stringify(submissions),
+      body: JSON.stringify({ submissions })
     };
-  } catch (err) {
-    console.error(err);
-    return { statusCode: 500, body: "Error fetching submissions" };
+
+  } catch (error) {
+    console.error("Netlify Fetch Error:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Server error", details: error.message })
+    };
   }
 }
