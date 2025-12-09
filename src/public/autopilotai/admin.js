@@ -24,25 +24,24 @@ const tableBody = document.getElementById("submissionsBody");
 // FETCH SUBMISSIONS
 async function loadSubmissions() {
   try {
-    const res = await fetch("/.netlify/forms/contact/submissions");
+    const res = await fetch("/.netlify/forms/contact/submissions/?limit=1000");
 
-if (!res.ok) throw new Error("Failed to load submissions");
+    if (!res.ok) throw new Error("Failed to load submissions");
 
-loadingState.classList.add("hidden");
+    const json = await res.json();
 
-const json = await res.json();
+    loadingState.classList.add("hidden");
 
-// Convert Netlify format → your dashboard format
-submissions = json.map(item => ({
-  name: item.data.name,
-  email: item.data.email,
-  phone: item.data.phone,
-  message: item.data.message,
-  created_at: item.created_at
-}));
+    // Convert Netlify format → dashboard format
+    submissions = json.map(item => ({
+      name: item.data.name,
+      email: item.data.email,
+      phone: item.data.phone,
+      message: item.data.message,
+      created_at: item.created_at || new Date().toISOString()
+    }));
 
-filtered = [...submissions];
-
+    filtered = [...submissions];
 
     if (filtered.length === 0) {
       emptyState.classList.remove("hidden");
@@ -56,6 +55,7 @@ filtered = [...submissions];
     errorState.classList.remove("hidden");
   }
 }
+
 
 // RENDER TABLE
 function renderTable() {
@@ -105,11 +105,15 @@ document.querySelectorAll(".sort-header").forEach(header => {
 
     sortState[key] = sortState[key] === "asc" ? "desc" : "asc";
 
-    filtered.sort((a, b) =>
-      sortState[key] === "asc"
-        ? (a[key] > b[key] ? 1 : -1)
-        : (a[key] < b[key] ? 1 : -1)
-    );
+    filtered.sort((a, b) => {
+  const aVal = key === "created_at" ? new Date(a.created_at) : a[key];
+  const bVal = key === "created_at" ? new Date(b.created_at) : b[key];
+
+  return sortState[key] === "asc"
+    ? aVal > bVal ? 1 : -1
+    : aVal < bVal ? 1 : -1;
+});
+
 
     renderTable();
   });
