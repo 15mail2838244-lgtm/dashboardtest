@@ -24,7 +24,7 @@ const tableBody = document.getElementById("submissionsBody");
 // FETCH SUBMISSIONS
 async function loadSubmissions() {
   try {
-    const res = await fetch("/.netlify/forms/contact/submissions/?limit=1000");
+    const res = await fetch("/.netlify/forms/contact/submissions");
 
     if (!res.ok) throw new Error("Failed to load submissions");
 
