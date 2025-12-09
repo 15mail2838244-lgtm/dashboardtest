@@ -1,16 +1,19 @@
 [build]
   command = "npm run build"
   publish = "dist"
-  functions = "netlify/functions"
 
+# Where Netlify should look for your serverless functions
 [functions]
+  directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# SPA redirect for React router
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+# Protect admin dashboard folder from search engines
 [[headers]]
   for = "/autopilotai/*"
   [headers.values]
