@@ -1,3 +1,4 @@
+// netlify/functions/get-submissions.js
 import fetch from 'node-fetch';
 
 export async function handler() {
@@ -13,14 +14,15 @@ export async function handler() {
     }
 
     // Get all forms on the site
-    const allForms = await fetch(`https://api.netlify.com/api/v1/forms?access_token=${apiToken}`);
-    const formsJson = await allForms.json();
+    const allFormsRes = await fetch(`https://api.netlify.com/api/v1/forms?access_token=${apiToken}`);
+    if (!allFormsRes.ok) throw new Error(`Forms list error: ${allFormsRes.status}`);
+    const formsJson = await allFormsRes.json();
 
     const form = formsJson.find(f => f.name === formName);
     if (!form) {
       return {
         statusCode: 404,
-        body: JSON.stringify({ error: "Form 'contact' not found" })
+        body: JSON.stringify({ error: `Form '${formName}' not found` })
       };
     }
 
@@ -28,6 +30,7 @@ export async function handler() {
     const submissionsRes = await fetch(
       `https://api.netlify.com/api/v1/forms/${form.id}/submissions?access_token=${apiToken}`
     );
+    if (!submissionsRes.ok) throw new Error(`Submissions error: ${submissionsRes.status}`);
     const submissions = await submissionsRes.json();
 
     return {
