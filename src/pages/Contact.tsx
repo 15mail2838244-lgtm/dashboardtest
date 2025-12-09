@@ -15,51 +15,45 @@ const Contact = () => {
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
+  e.preventDefault();
+  setIsSubmitting(true);
+  setError('');
 
+  try {
+    // 1️⃣ Submit to Netlify Forms (this stores submissions)
+    const formEl = e.target as HTMLFormElement;
+    const formDataObj = new FormData(formEl);
+
+    await fetch('/', {
+      method: 'POST',
+      body: formDataObj,
+    });
+
+    // 2️⃣ Trigger email notification
     try {
-      // Save to Supabase database
-      const saveResponse = await fetch('/.netlify/functions/save-submission', {
+      await fetch('/.netlify/functions/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
-
-      if (!saveResponse.ok) {
-        throw new Error('Failed to save submission');
-      }
-
-      // Send Gmail notification (optional - will work when Gmail is configured)
-      try {
-        await fetch('/.netlify/functions/send-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        });
-      } catch (emailError) {
-        console.warn('Email notification failed:', emailError);
-      }
-
-      // Show success message
-      setSubmitted(true);
-      setFormData({ name: '', email: '', phone: '', message: '' });
-
-      setTimeout(() => {
-        setSubmitted(false);
-      }, 5000);
-    } catch (err) {
-      console.error('Submission error:', err);
-      setError('Failed to submit form. Please try again or contact us directly.');
-    } finally {
-      setIsSubmitting(false);
+    } catch (emailError) {
+      console.warn('Email notification failed:', emailError);
     }
-  };
+
+    // 3️⃣ Reset form
+    setSubmitted(true);
+    setFormData({ name: '', email: '', phone: '', message: '' });
+
+    setTimeout(() => setSubmitted(false), 5000);
+  } catch (err) {
+    console.error('Submission error:', err);
+    setError('Failed to submit form. Please try again or contact us directly.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
