@@ -24,7 +24,6 @@ const tableBody = document.getElementById("submissionsBody");
 // FETCH SUBMISSIONS
 async function loadSubmissions() {
   try {
-    // call your Netlify function (server-side)
     const res = await fetch("/.netlify/functions/get-submissions");
 
     if (!res.ok) {
@@ -36,16 +35,16 @@ async function loadSubmissions() {
 
     loadingState.classList.add("hidden");
 
-    // function returns { submissions: [...] }
     if (!json || !Array.isArray(json.submissions)) {
       throw new Error("Invalid function response format");
     }
 
+    // FIXED: Your function already returns the correct fields (no .data)
     submissions = json.submissions.map(item => ({
-      name: (item.data && item.data.name) || "",
-      email: (item.data && item.data.email) || "",
-      phone: (item.data && item.data.phone) || "",
-      message: (item.data && item.data.message) || "",
+      name: item.name || "",
+      email: item.email || "",
+      phone: item.phone || "",
+      message: item.message || "",
       created_at: item.created_at || new Date().toISOString()
     }));
 
@@ -61,10 +60,11 @@ async function loadSubmissions() {
     console.error("Error loading submissions:", err);
     loadingState.classList.add("hidden");
     errorState.classList.remove("hidden");
-    // show error in console and also put a descriptive message in the page for debugging
+
     try {
-      document.getElementById("errorState").textContent = "Error loading submissions: " + err.message;
-    } catch(e){}
+      document.getElementById("errorState").textContent =
+        "Error loading submissions: " + err.message;
+    } catch (e) {}
   }
 }
 
@@ -80,6 +80,7 @@ function renderTable() {
     const row = document.createElement("tr");
     row.classList.add("border-b");
 
+    // FIXED: Now using sub.name, sub.email, etc.
     row.innerHTML = `
       <td class="py-3 px-4">${sub.name}</td>
       <td class="py-3 px-4">${sub.email}</td>
@@ -118,14 +119,13 @@ document.querySelectorAll(".sort-header").forEach(header => {
     sortState[key] = sortState[key] === "asc" ? "desc" : "asc";
 
     filtered.sort((a, b) => {
-  const aVal = key === "created_at" ? new Date(a.created_at) : a[key];
-  const bVal = key === "created_at" ? new Date(b.created_at) : b[key];
+      const aVal = key === "created_at" ? new Date(a.created_at) : a[key];
+      const bVal = key === "created_at" ? new Date(b.created_at) : b[key];
 
-  return sortState[key] === "asc"
-    ? aVal > bVal ? 1 : -1
-    : aVal < bVal ? 1 : -1;
-});
-
+      return sortState[key] === "asc"
+        ? aVal > bVal ? 1 : -1
+        : aVal < bVal ? 1 : -1;
+    });
 
     renderTable();
   });
